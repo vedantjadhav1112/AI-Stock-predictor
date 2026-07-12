@@ -1,0 +1,35 @@
+# ============================================================
+# .gitignore — Files that should NOT go to GitHub
+# ============================================================
+
+# Python virtual environment (huge, everyone installs their own)
+venv/
+.venv/
+
+# Python bytecode (auto-generated, not needed in source control)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Trained model files (too large for Git, users retrain locally)
+models/*.pkl
+models/*.joblib
+
+# Environment variables (contains API keys — NEVER commit these!)
+.env
+
+# IDE settings (personal preference, not part of the project)
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
