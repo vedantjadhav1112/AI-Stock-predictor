@@ -1,5 +1,5 @@
 // ============================================================
-// screens/home_screen.dart — Ticker Input & Model Selection
+// screens/home_screen.dart - Ticker input and API settings
 // ============================================================
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -23,7 +23,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isSavingApiUrl = false;
 
   static const _apiUrlKey = 'api_base_url';
-  static const _defaultApiUrl = 'http://10.124.221.204:8000';
+  static const _defaultApiUrl = 'http://127.0.0.1:8000';
+  static const _popularTickers = ['AAPL', 'MSFT', 'NVDA', 'TSLA', 'GOOGL'];
 
   @override
   void initState() {
@@ -54,11 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final hasScheme = Uri.tryParse(trimmed)?.hasScheme ?? false;
-    if (hasScheme) {
-      return trimmed;
-    }
-
-    return 'https://$trimmed';
+    return hasScheme ? trimmed : 'https://$trimmed';
   }
 
   @override
@@ -70,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _saveApiUrl() async {
     final apiUrl = _normalizeApiUrl(_apiUrlController.text);
-    if (apiUrl.isEmpty) {
+    if (apiUrl.isEmpty || _isSavingApiUrl) {
       return;
     }
 
@@ -90,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (!isReachable) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Backend is not reachable. Check the URL and try again.'),
+            content: Text('Backend is not reachable. Check the URL.'),
           ),
         );
         return;
@@ -100,9 +97,13 @@ class _HomeScreenState extends State<HomeScreen> {
       await prefs.setString(_apiUrlKey, apiUrl);
       _apiUrlController.text = apiUrl;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('API URL saved and verified')),
-      );
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('API URL saved')));
     } finally {
       if (mounted) {
         setState(() {
@@ -112,164 +113,236 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _analyze() async {
+  void _analyze() {
     final ticker = _tickerController.text.trim().toUpperCase();
-    if (ticker.isEmpty) return;
+    if (ticker.isEmpty) {
+      return;
+    }
 
-    // Navigate to analysis screen, where loading will happen
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AnalysisScreen(
-          ticker: ticker,
-          modelType: _selectedModel,
-        ),
+        builder: (context) =>
+            AnalysisScreen(ticker: ticker, modelType: _selectedModel),
       ),
+    );
+  }
+
+  void _setTicker(String ticker) {
+    _tickerController.text = ticker;
+    _tickerController.selection = TextSelection.collapsed(
+      offset: ticker.length,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 48.0),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF0B1120), Color(0xFF0F172A), Color(0xFF111827)],
+          ),
+        ),
+        child: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final maxWidth = constraints.maxWidth > 620
+                  ? 560.0
+                  : double.infinity;
+
+              return Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxWidth),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(20, 28, 20, 28),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildHeader(),
+                        const SizedBox(height: 24),
+                        _buildAnalysisPanel(),
+                        const SizedBox(height: 16),
+                        _buildConnectionPanel(),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            color: const Color(0xFF2563EB).withValues(alpha: 0.16),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: const Color(0xFF60A5FA).withValues(alpha: 0.22),
+            ),
+          ),
+          child: const Icon(
+            Icons.auto_graph_rounded,
+            color: Color(0xFF60A5FA),
+            size: 30,
+          ),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Hero Section
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF3B82F6).withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.auto_graph_rounded,
-                  size: 48,
-                  color: Color(0xFF60A5FA),
-                ),
-              ),
-              const SizedBox(height: 32),
               Text(
-                'AI Stock\nPredictor',
+                'AI Stock Predictor',
                 style: GoogleFonts.inter(
-                  fontSize: 42,
-                  fontWeight: FontWeight.w800,
-                  height: 1.1,
                   color: Colors.white,
-                  letterSpacing: -1,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  height: 1.05,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 6),
               Text(
-                'Machine Learning & NLP powered market analysis straight to your pocket.',
+                'Forecasts, technicals, and market sentiment',
                 style: TextStyle(
-                  fontSize: 16,
                   color: const Color(0xFF94A3B8).withValues(alpha: 0.9),
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 40),
-
-              const Text(
-                'API SERVER URL',
-                style: TextStyle(
-                  color: Color(0xFF94A3B8),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _apiUrlController,
-                keyboardType: TextInputType.url,
-                textInputAction: TextInputAction.done,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-                decoration: const InputDecoration(
-                  hintText: 'https://your-api.example.com',
-                  prefixIcon: Icon(Icons.public, color: Color(0xFF60A5FA)),
-                ),
-                onSubmitted: (_) => _saveApiUrl(),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: _isLoadingApiUrl || _isSavingApiUrl
-                      ? null
-                      : _saveApiUrl,
-                  child: _isSavingApiUrl
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text('TEST & SAVE API URL'),
-                ),
-              ),
-              const SizedBox(height: 40),
-
-              // Input Form
-              const Text(
-                'STOCK TICKER',
-                style: TextStyle(
-                  color: Color(0xFF94A3B8),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _tickerController,
-                enabled: !_isLoadingApiUrl,
-                textCapitalization: TextCapitalization.characters,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 2,
-                ),
-                decoration: const InputDecoration(
-                  hintText: 'e.g. AAPL, MSFT, TSLA',
-                  prefixIcon: Icon(Icons.search, color: Color(0xFF60A5FA)),
-                ),
-                onSubmitted: (_) => _analyze(),
-              ),
-              const SizedBox(height: 24),
-
-              const Text(
-                'PREDICTION MODEL',
-                style: TextStyle(
-                  color: Color(0xFF94A3B8),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              const SizedBox(height: 8),
-              _buildModelSelector(),
-              const SizedBox(height: 48),
-
-              // Analyze Button
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _isLoadingApiUrl ? null : _analyze,
-                  child: const Text('RUN ANALYSIS'),
+                  fontSize: 13,
+                  height: 1.35,
                 ),
               ),
             ],
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAnalysisPanel() {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: _panelDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _sectionLabel('Stock ticker'),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _tickerController,
+            enabled: !_isLoadingApiUrl,
+            textCapitalization: TextCapitalization.characters,
+            textInputAction: TextInputAction.search,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0,
+            ),
+            decoration: const InputDecoration(
+              hintText: 'AAPL',
+              prefixIcon: Icon(Icons.search, color: Color(0xFF60A5FA)),
+            ),
+            onSubmitted: (_) => _analyze(),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _popularTickers
+                .map(
+                  (ticker) => _QuickTickerChip(
+                    ticker: ticker,
+                    onTap: () => _setTicker(ticker),
+                  ),
+                )
+                .toList(),
+          ),
+          const SizedBox(height: 24),
+          _sectionLabel('Prediction model'),
+          const SizedBox(height: 8),
+          _buildModelSelector(),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 54,
+            child: ElevatedButton.icon(
+              onPressed: _isLoadingApiUrl ? null : _analyze,
+              icon: const Icon(Icons.play_arrow_rounded),
+              label: const Text('Run Analysis'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildConnectionPanel() {
+    return Container(
+      decoration: _panelDecoration(),
+      child: Material(
+        color: Colors.transparent,
+        child: Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
+          childrenPadding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
+          leading: const Icon(Icons.dns_outlined, color: Color(0xFF60A5FA)),
+          title: const Text(
+            'API Connection',
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: Color(0xFFE2E8F0),
+            ),
+          ),
+          subtitle: Consumer<ApiService>(
+            builder: (context, api, _) => Text(
+              api.baseUrl,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+            ),
+          ),
+          children: [
+            TextField(
+              controller: _apiUrlController,
+              keyboardType: TextInputType.url,
+              textInputAction: TextInputAction.done,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+              decoration: const InputDecoration(
+                hintText: 'http://127.0.0.1:8000',
+                prefixIcon: Icon(Icons.public, color: Color(0xFF60A5FA)),
+              ),
+              onSubmitted: (_) => _saveApiUrl(),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: 46,
+              child: OutlinedButton.icon(
+                onPressed: _isLoadingApiUrl || _isSavingApiUrl
+                    ? null
+                    : _saveApiUrl,
+                icon: _isSavingApiUrl
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.check_circle_outline),
+                label: Text(_isSavingApiUrl ? 'Checking' : 'Test and Save'),
+              ),
+            ),
+          ],
+        ),
         ),
       ),
     );
@@ -279,19 +352,23 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E3A5F).withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(16),
+        color: const Color(0xFF111827).withValues(alpha: 0.62),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: const Color(0xFF63B3ED).withValues(alpha: 0.2),
+          color: const Color(0xFF63B3ED).withValues(alpha: 0.16),
         ),
       ),
       child: Row(
         children: [
           Expanded(
-            child: _modelTab('forest', 'Random Forest', Icons.park_outlined),
+            child: _modelTab(
+              'forest',
+              'Random Forest',
+              Icons.account_tree_outlined,
+            ),
           ),
           Expanded(
-            child: _modelTab('linear', 'Linear Reg', Icons.timeline),
+            child: _modelTab('linear', 'Linear', Icons.timeline_rounded),
           ),
         ],
       ),
@@ -300,36 +377,97 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _modelTab(String value, String label, IconData icon) {
     final isSelected = _selectedModel == value;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedModel = value),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? const Color(0xFF3B82F6).withValues(alpha: 0.3)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              size: 20,
-              color: isSelected ? const Color(0xFF60A5FA) : const Color(0xFF94A3B8),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: () => setState(() => _selectedModel = value),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFF2563EB) : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 18,
                 color: isSelected ? Colors.white : const Color(0xFF94A3B8),
-                fontSize: 13,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               ),
-            ),
-          ],
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : const Color(0xFF94A3B8),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+
+  Widget _sectionLabel(String label) {
+    return Text(
+      label.toUpperCase(),
+      style: const TextStyle(
+        color: Color(0xFF94A3B8),
+        fontSize: 11,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0,
+      ),
+    );
+  }
+
+  BoxDecoration _panelDecoration() {
+    return BoxDecoration(
+      color: const Color(0xFF172033).withValues(alpha: 0.88),
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(
+        color: const Color(0xFF63B3ED).withValues(alpha: 0.16),
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.22),
+          blurRadius: 24,
+          offset: const Offset(0, 12),
+        ),
+      ],
+    );
+  }
 }
+
+class _QuickTickerChip extends StatelessWidget {
+  final String ticker;
+  final VoidCallback onTap;
+
+  const _QuickTickerChip({required this.ticker, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionChip(
+      onPressed: onTap,
+      avatar: const Icon(Icons.add_rounded, size: 16, color: Color(0xFF60A5FA)),
+      label: Text(ticker),
+      labelStyle: const TextStyle(
+        color: Color(0xFFE2E8F0),
+        fontWeight: FontWeight.w700,
+      ),
+      backgroundColor: const Color(0xFF1E293B),
+      side: BorderSide(color: const Color(0xFF63B3ED).withValues(alpha: 0.16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    );
+  }
+}
+

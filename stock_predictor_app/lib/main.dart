@@ -1,5 +1,5 @@
 // ============================================================
-// main.dart — App Entry Point & Theme Configuration
+// main.dart - App Entry Point and Theme Configuration
 // ============================================================
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -33,9 +33,7 @@ class StockPredictorApp extends StatelessWidget {
           surface: const Color(0xFF1E293B),
           error: const Color(0xFFEF4444),
         ),
-        textTheme: GoogleFonts.interTextTheme(
-          ThemeData.dark().textTheme,
-        ),
+        textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
         appBarTheme: AppBarTheme(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -50,19 +48,25 @@ class StockPredictorApp extends StatelessWidget {
           filled: true,
           fillColor: const Color(0xFF1E3A5F).withValues(alpha: 0.5),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: const Color(0xFF63B3ED).withValues(alpha: 0.2)),
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(
+              color: const Color(0xFF63B3ED).withValues(alpha: 0.2),
+            ),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: const Color(0xFF63B3ED).withValues(alpha: 0.2)),
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(
+              color: const Color(0xFF63B3ED).withValues(alpha: 0.2),
+            ),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(8),
             borderSide: const BorderSide(color: Color(0xFF3B82F6), width: 2),
           ),
           labelStyle: const TextStyle(color: Color(0xFF94A3B8)),
-          hintStyle: TextStyle(color: const Color(0xFF94A3B8).withValues(alpha: 0.6)),
+          hintStyle: TextStyle(
+            color: const Color(0xFF94A3B8).withValues(alpha: 0.6),
+          ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
@@ -70,7 +74,7 @@ class StockPredictorApp extends StatelessWidget {
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(8),
             ),
             textStyle: GoogleFonts.inter(
               fontSize: 16,

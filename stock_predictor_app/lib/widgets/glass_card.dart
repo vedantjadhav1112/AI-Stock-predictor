@@ -1,5 +1,5 @@
 // ============================================================
-// widgets/glass_card.dart — Glassmorphism Card Widget
+// widgets/glass_card.dart - Shared surface widget
 // ============================================================
 import 'dart:ui';
 import 'package:flutter/material.dart';
@@ -15,7 +15,7 @@ class GlassCard extends StatelessWidget {
     required this.child,
     this.padding,
     this.margin,
-    this.borderRadius = 16,
+    this.borderRadius = 8,
   });
 
   @override
@@ -25,27 +25,20 @@ class GlassCard extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
-            padding: padding ?? const EdgeInsets.all(20),
+            padding: padding ?? const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  const Color(0xFF1E3A5F).withValues(alpha: 0.55),
-                  const Color(0xFF0F2038).withValues(alpha: 0.65),
-                ],
-              ),
+              color: const Color(0xFF172033).withValues(alpha: 0.88),
               borderRadius: BorderRadius.circular(borderRadius),
               border: Border.all(
-                color: const Color(0xFF63B3ED).withValues(alpha: 0.18),
+                color: const Color(0xFF63B3ED).withValues(alpha: 0.16),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.25),
-                  blurRadius: 32,
-                  offset: const Offset(0, 8),
+                  color: Colors.black.withValues(alpha: 0.22),
+                  blurRadius: 24,
+                  offset: const Offset(0, 10),
                 ),
               ],
             ),

@@ -1,5 +1,5 @@
 // ============================================================
-// widgets/sentiment_bar.dart — Sentiment Breakdown Widget
+// widgets/sentiment_bar.dart - Sentiment breakdown widget
 // ============================================================
 import 'package:flutter/material.dart';
 import '../models/stock_analysis.dart';
@@ -11,45 +11,70 @@ class SentimentBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final sentimentColor = _sentimentColor(sentiment.overallSentiment);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Overall sentiment badge
-        Row(
+        Wrap(
+          spacing: 12,
+          runSpacing: 10,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: _sentimentGradient(sentiment.overallSentiment),
+                color: sentimentColor.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: sentimentColor.withValues(alpha: 0.34),
                 ),
-                borderRadius: BorderRadius.circular(20),
               ),
-              child: Text(
-                '${_sentimentIcon(sentiment.overallSentiment)} ${sentiment.overallSentiment}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: sentimentColor,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    sentiment.overallSentiment,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(width: 12),
             Text(
-              'Confidence: ${(sentiment.confidence * 100).toStringAsFixed(0)}%',
+              'Confidence ${(sentiment.confidence * 100).toStringAsFixed(0)}%',
               style: TextStyle(
-                color: const Color(0xFF94A3B8).withValues(alpha: 0.8),
+                color: const Color(0xFF94A3B8).withValues(alpha: 0.88),
                 fontSize: 13,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
         ),
         const SizedBox(height: 20),
-
-        // Breakdown bars
-        _breakdownRow('Bullish', sentiment.positivePct, const Color(0xFF22C55E)),
+        _breakdownRow(
+          'Bullish',
+          sentiment.positivePct,
+          const Color(0xFF22C55E),
+        ),
         const SizedBox(height: 10),
-        _breakdownRow('Bearish', sentiment.negativePct, const Color(0xFFEF4444)),
+        _breakdownRow(
+          'Bearish',
+          sentiment.negativePct,
+          const Color(0xFFEF4444),
+        ),
         const SizedBox(height: 10),
         _breakdownRow('Neutral', sentiment.neutralPct, const Color(0xFF94A3B8)),
       ],
@@ -57,6 +82,8 @@ class SentimentBar extends StatelessWidget {
   }
 
   Widget _breakdownRow(String label, double pct, Color color) {
+    final value = (pct / 100).clamp(0.0, 1.0);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -66,54 +93,43 @@ class SentimentBar extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                color: color.withValues(alpha: 0.9),
+                color: color.withValues(alpha: 0.94),
                 fontSize: 13,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
               ),
             ),
             Text(
               '${pct.toStringAsFixed(0)}%',
               style: TextStyle(
-                color: color.withValues(alpha: 0.9),
+                color: color.withValues(alpha: 0.94),
                 fontSize: 13,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w800,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 5),
         ClipRRect(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(5),
           child: LinearProgressIndicator(
-            value: pct / 100,
-            backgroundColor: color.withValues(alpha: 0.1),
+            value: value,
+            backgroundColor: color.withValues(alpha: 0.12),
             valueColor: AlwaysStoppedAnimation<Color>(color),
-            minHeight: 6,
+            minHeight: 7,
           ),
         ),
       ],
     );
   }
 
-  String _sentimentIcon(String sentiment) {
+  Color _sentimentColor(String sentiment) {
     switch (sentiment) {
       case 'Bullish':
-        return '🟢';
+        return const Color(0xFF22C55E);
       case 'Bearish':
-        return '🔴';
+        return const Color(0xFFEF4444);
       default:
-        return '⚪';
-    }
-  }
-
-  List<Color> _sentimentGradient(String sentiment) {
-    switch (sentiment) {
-      case 'Bullish':
-        return [const Color(0xFF16A34A), const Color(0xFF22C55E)];
-      case 'Bearish':
-        return [const Color(0xFFDC2626), const Color(0xFFEF4444)];
-      default:
-        return [const Color(0xFF64748B), const Color(0xFF94A3B8)];
+        return const Color(0xFF94A3B8);
     }
   }
 }

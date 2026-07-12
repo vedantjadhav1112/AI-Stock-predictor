@@ -1,5 +1,5 @@
 // ============================================================
-// services/api_service.dart — HTTP Client for FastAPI Backend
+// services/api_service.dart - HTTP Client for FastAPI Backend
 // ============================================================
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
@@ -8,7 +8,14 @@ import '../models/stock_analysis.dart';
 
 class ApiService extends ChangeNotifier {
   // Default to the local backend address, but allow the app to override it.
-  String _baseUrl = 'http://10.124.221.204:8000';
+  String _baseUrl = 'http://127.0.0.1:8000';
+
+  /// Common headers sent with every request.
+  /// The ngrok header bypasses the free-tier browser interstitial.
+  static const _defaultHeaders = {
+    'ngrok-skip-browser-warning': 'true',
+    'Accept': 'application/json',
+  };
 
   String get baseUrl => _baseUrl;
 
@@ -44,7 +51,7 @@ class ApiService extends ChangeNotifier {
   Future<bool> healthCheck() async {
     try {
       final response = await http
-          .get(Uri.parse('$_baseUrl/api/health'))
+          .get(Uri.parse('$_baseUrl/api/health'), headers: _defaultHeaders)
           .timeout(const Duration(seconds: 5));
       return response.statusCode == 200;
     } catch (e) {
@@ -53,16 +60,21 @@ class ApiService extends ChangeNotifier {
   }
 
   /// Run full stock analysis
-  Future<StockAnalysis?> analyzeStock(String ticker,
-      {String modelType = 'forest'}) async {
+  Future<StockAnalysis?> analyzeStock(
+    String ticker, {
+    String modelType = 'forest',
+  }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
       final uri = Uri.parse(
-          '$_baseUrl/api/stock/$ticker/analysis?model_type=$modelType');
-      final response = await http.get(uri).timeout(const Duration(seconds: 120));
+        '$_baseUrl/api/stock/$ticker/analysis?model_type=$modelType',
+      );
+      final response = await http
+          .get(uri, headers: _defaultHeaders)
+          .timeout(const Duration(seconds: 120));
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
@@ -89,7 +101,7 @@ class ApiService extends ChangeNotifier {
   Future<Map<String, dynamic>?> getPrice(String ticker) async {
     try {
       final response = await http
-          .get(Uri.parse('$_baseUrl/api/stock/$ticker/price'))
+          .get(Uri.parse('$_baseUrl/api/stock/$ticker/price'), headers: _defaultHeaders)
           .timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 200) {
@@ -105,7 +117,7 @@ class ApiService extends ChangeNotifier {
   Future<Map<String, dynamic>?> getNews(String ticker) async {
     try {
       final response = await http
-          .get(Uri.parse('$_baseUrl/api/stock/$ticker/news'))
+          .get(Uri.parse('$_baseUrl/api/stock/$ticker/news'), headers: _defaultHeaders)
           .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
