@@ -1,13 +1,13 @@
 # ============================================================
-# AI Stock Research Assistant — Dependencies
+# AI Financial Research Platform — Dependencies
 # ============================================================
 # Each library has a comment explaining WHY we need it.
 # Versions are pinned so the project works the same everywhere.
 # ============================================================
 
 # --- Data Layer ---
-yfinance>=0.2.18          # Download historical stock data from Yahoo Finance
-requests>=2.31.0          # Make HTTP requests (fetch news from APIs)
+yfinance>=0.2.18          # Download historical stock data, financials, news from Yahoo Finance
+requests>=2.31.0          # Make HTTP requests (fetch news, APIs)
 
 # --- Data Processing ---
 pandas>=2.0.0             # Tabular data manipulation (like Excel but in Python)
@@ -26,6 +26,26 @@ streamlit>=1.28.0         # Build web apps in pure Python (no HTML/CSS/JS needed
 # --- AI / NLP (Natural Language Processing) ---
 transformers>=4.30.0      # Hugging Face: pre-trained AI models for text tasks
 torch>=2.0.0              # PyTorch: the engine that runs transformer models
+
+# --- LLM Agent Reasoning ---
+google-genai>=1.0.0       # Google Gemini API client for AI agent reasoning
+
+# --- Enhanced News Collection ---
+feedparser>=6.0.0         # Parse RSS feeds from financial news outlets
+trafilatura>=1.6.0        # Extract article body text from URLs (fast, robust)
+
+# --- Macroeconomic Data ---
+fredapi>=0.5.0            # Federal Reserve Economic Data API client
+
+# --- Async Execution ---
+aiohttp>=3.9.0            # Async HTTP for parallel agent API calls
+aiofiles>=23.0.0          # Async file I/O operations
+
+# --- Caching ---
+cachetools>=5.3.0         # In-memory TTL caching for API responses
+
+# --- Report Generation ---
+weasyprint>=60.0          # Generate PDF reports from HTML/CSS (optional)
 
 # --- Utilities ---
 python-dotenv>=1.0.0      # Load API keys from .env files (security best practice)

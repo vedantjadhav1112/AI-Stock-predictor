@@ -15,6 +15,14 @@
 # With this file:
 #   from src.data_fetcher import get_stock_data  ← Works ✅
 #
-# This file can be empty! Its mere existence is what matters.
-# We'll add convenience imports here as we build more modules.
+# Modules in this package:
+#   - data_fetcher:     Stock price data from Yahoo Finance
+#   - preprocessor:     Data cleaning and validation
+#   - feature_engineer: Technical indicators and ML features
+#   - model:            ML model training and prediction
+#   - news_analyzer:    FinBERT sentiment analysis (legacy)
+#   - financial_data:   Financial statements and ratios
+#   - macro_data:       Macroeconomic indicators
+#   - news_collector:   Multi-source news aggregation
 # ============================================================
+

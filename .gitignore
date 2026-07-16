@@ -22,6 +22,13 @@ models/*.joblib
 .vscode/
 .idea/
 
+# AI tool settings (local config, not part of the project)
+.claude/
+.gemini/
+
+# Dart/Flutter package cache (downloaded by pub get)
+.pub-cache/
+
 # OS files
 .DS_Store
 Thumbs.db
@@ -33,3 +40,15 @@ Thumbs.db
 dist/
 build/
 *.egg-info/
+
+# Flutter/Dart generated files
+.pub-cache/
+.dart_tool/
+.flutter-plugins-dependencies
+stock_predictor_app/.dart_tool/
+stock_predictor_app/build/
+stock_predictor_app/.flutter-plugins-dependencies
+stock_predictor_app/*.iml
+stock_predictor_app/android/.gradle/
+stock_predictor_app/android/.kotlin/
+stock_predictor_app/ios/Flutter/ephemeral/

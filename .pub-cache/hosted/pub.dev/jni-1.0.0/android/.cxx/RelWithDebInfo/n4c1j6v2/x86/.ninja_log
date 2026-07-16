@@ -1,5 +1,0 @@
-# ninja log v5
-1	126	8055477740319970	CMakeFiles/jni.dir/include/dart_api_dl.c.o	6d50ebd13d8d262c
-13	192	8055477740987765	CMakeFiles/jni.dir/dartjni.c.o	eebc93e747f9bc62
-7	788	8055477746891250	CMakeFiles/jni.dir/third_party/global_jni_env.c.o	da5761403e7b5eb1
-788	881	8055477747836378	V:/AI STOCK PREDICTOR/stock_predictor_app/build/jni/intermediates/cxx/RelWithDebInfo/n4c1j6v2/obj/x86/libdartjni.so	ca21dc2d018a2b81
